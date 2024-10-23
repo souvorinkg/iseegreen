@@ -34,7 +34,7 @@ namespace csci340_iseegreen.Pages_Search
 
         public string Error {get; set;} = default!;
 
-        public int id {get; set;} = 1;
+        public int id {get; set;}
 
         public string scientifcName {get; set;}
 
@@ -61,20 +61,62 @@ namespace csci340_iseegreen.Pages_Search
                 .ToListAsync();
             }
             Identifier = KewID;
-            string genus = Taxon[0].GenusID;
-            string species = Taxon[0].SpecificEpithet;
+            for (int i = 0; i < Taxon.Count; i++)
+            {
+                string genus = Taxon[i].GenusID;
+                string species = Taxon[i].SpecificEpithet;
+                Console.WriteLine("Genus: " + Taxon[i].GenusID);
+                Console.WriteLine("Species: " + Taxon[i].SpecificEpithet);
+                scientifcName = genus + " " + species.ToLower();
+                Console.WriteLine("Scientific Name: " + scientifcName);
+            }
+            //string genus = Taxon[0].GenusID;
+            //string species = Taxon[0].SpecificEpithet;
 
-            scientifcName = genus + " " + species.ToLower();
+            //scientifcName = genus + " " + species.ToLower();
 
 
             // see if I can get a string here... time to investigate the properties of Taxon. 
-            Console.WriteLine("Genus: " + genus);
-            Console.WriteLine("Species: " + species);
-            Console.WriteLine("Scientific Name: " + scientifcName);
-            //int id = await GetIDfromName(scientifcName);
+            //Console.WriteLine("Genus: " + genus);
+            //Console.WriteLine("Species: " + species);
+            //Console.WriteLine("Scientific Name: " + scientifcName);
+            string id = await GetIDfromName(scientifcName);
             Console.WriteLine("ID in OnGet is: " + id);
 
+            // Function that gets the Description from the ID
+            await GetDescription(id);
+
+
+
             return Page();
+        }
+
+        private async Task GetDescription(string id)
+        {
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    string url = $"https://perenual.com/api/species/details/{id}?key=sk-il1O6717dcf920ca97383";
+                    var response = await client.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("Successfully got the data, may have description");
+                    var jsonObject = JObject.Parse(responseData);
+                    var description = jsonObject["description"]?.ToString();
+                    ViewData["description"] = description;
+                    Console.WriteLine("Description: " + description);
+                    Console.WriteLine("Successfully got description");
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine($"Request error: {e.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                }
+            }
         }
 
         public async Task<IActionResult> OnPostAddList(string KewID, int? list) {
@@ -141,9 +183,9 @@ namespace csci340_iseegreen.Pages_Search
                 ListID = list.Value,
                 TimeDiscovered = DateTime.Now
             };
-            Console.WriteLine("specific name: " );
+            //Console.WriteLine("specific name: " );
             //var id = await GetIDfromName(scientifcName);
-            Console.WriteLine("ID in OnGet is: " + id);
+            //Console.WriteLine("ID in OnGet is: " + id);
 
             await _context.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -218,7 +260,7 @@ namespace csci340_iseegreen.Pages_Search
             }
         }
 
-        public async Task<int> GetIDfromName(string name)
+        public async Task<string> GetIDfromName(string name)
         {
             using (var client = new HttpClient())
             {
@@ -236,22 +278,23 @@ namespace csci340_iseegreen.Pages_Search
                         var firstEntry = data[0];
                         var id = firstEntry["id"]?.ToString();
                         Console.WriteLine("First entry ID: " + id);
+                        return id;
                     }
                     else
                     {
                         Console.WriteLine("No data found for the given query.");
+                        return "Error";
                     }
-                    return (int)id;
                 }
                 catch (HttpRequestException e)
                 {
                     Console.WriteLine($"Request error: {e.Message}");
-                    return 0;
+                    return "Error";
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"An error occurred: {ex.Message}");
-                    return 0;
+                    return "Error";
                 }
             }
         }
