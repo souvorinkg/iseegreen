@@ -10,6 +10,8 @@ Console.WriteLine($"[DebugLog][Program] ASPNETCORE_ENVIRONMENT='{aspNetCoreEnvir
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddHttpLogging(options => { });
+builder.Services.AddAntiforgery();
 
 if (aspNetCoreEnvironment == "Development")
 {
@@ -80,6 +82,8 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 Console.WriteLine("[DebugLog][Program] Synchronous initialization completed, starting WebApplication.Run task...");
+
+
 Task appRun = Task.Run(() => app.Run());
 
 Console.WriteLine("[DebugLog][Program] Starting DbInitializer.Initialize task...");
