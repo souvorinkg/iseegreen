@@ -33,7 +33,7 @@ namespace csci340_iseegreen.Pages.Search
 
 
         public PaginatedList<csci340_iseegreen.Models.Taxa> Taxa { get;set; } = default!;
-        public List<string> Families {get; set;}
+        public required List<string> Families {get; set;} 
         // List of (CategoryID, FullCategoryName) entries for all categories
         // e.g., ("F", "Fern")
         public IList<(string, string)> CategoryOptions { get; set; }
@@ -51,14 +51,14 @@ namespace csci340_iseegreen.Pages.Search
         [BindProperty(SupportsGet = true)]
         public string? CategoryFilter { get; set; }
 
-        public string SpeciesSort {get; set;}
-        public string GenusSort {get; set;}
-        public string CurrentSpecies {get; set;}
-        public string CurrentGenus {get; set;}
-        public string CurrentFamily {get; set;}
-        public string CurrentSort {get; set;}
-        public string CurrentFilter {get;set;}
-        public string CurrentCat {get; set;}
+        public required string SpeciesSort {get; set;}
+        public required string GenusSort {get; set;}
+        public required string CurrentSpecies {get; set;}
+        public required string CurrentGenus {get; set;}
+        public required string CurrentFamily {get; set;}
+        public required string CurrentSort {get; set;}
+        public required string CurrentFilter {get;set;}
+        public required string CurrentCat {get; set;}
 
 
 

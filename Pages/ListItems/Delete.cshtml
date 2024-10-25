@@ -18,27 +18,20 @@
             @Html.DisplayNameFor(model => model.ListItems.TimeDiscovered):
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ListItems.TimeDiscovered)
+            @Html.DisplayFor(model => model.ListItems.TimeDiscovered):
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.ListItems.Plant):
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ListItems.Plant.Name)
+            @Html.DisplayFor(model => model.ListItems.Plant.Name):
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.ListItems.List):
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ListItems.List.Name)
+            @Html.DisplayFor(model => model.ListItems.List.Name):
         </dd>
-        <!--
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ListItems.Location):
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ListItems.Location.Id)
-        </dd> -->
     </dl>
     
     <form method="post">
@@ -48,3 +41,4 @@
         <a asp-page="./Index" asp-route-itemid="@Model.ListItems.ListID">Back to List</a>
     </form>
 </div>
+

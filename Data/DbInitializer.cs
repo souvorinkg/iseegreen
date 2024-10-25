@@ -52,8 +52,8 @@ namespace csci340_iseegreen.Data
                 {
                     categories.Add(new Categories
                     {
-                        Category = DbCast<string>(reader["Category"]),
-                        Description = DbCast<string?>(reader["Description"]),
+                        Category = DbCast<string>(reader["Category"]) ?? "Unknown",
+                        Description = DbCast<string>(reader["Description"]) ?? "Unknown",
                         Sort = (int)DbCast<long>(reader["Sort"]),
                         APG4sort = DbCast<long>(reader["APG4sort"]),
                     });
@@ -82,7 +82,7 @@ namespace csci340_iseegreen.Data
                 {
                     taxonomicOrders.Add(new TaxonomicOrders
                     {
-                        TaxonomicOrder = DbCast<string>(reader["TaxonomicOrder"]),
+                        TaxonomicOrder = DbCast<string>(reader["TaxonomicOrder"]) ?? "Unknown",
                         SortLevel1Heading = DbCast<string?>(reader["SortLevel1Heading"]),
                         SortLevel1 = (int)DbCast<long>(reader["SortLevel1"]),
                         SortLevel2Heading = DbCast<string?>(reader["SortLevel2Heading"]),
@@ -121,10 +121,11 @@ namespace csci340_iseegreen.Data
                 {
                     families.Add(new Families
                     {
-                        Family = DbCast<string>(reader["Family"]),
+                        Family = DbCast<string>(reader["Family"]) ?? "Unknown",
+                        Category = context.Categories.Find(DbCast<string>(reader["CategoryID"])) ?? new Categories { Category = "Unknown", Description = "Unknown", Sort = 0, APG4sort = 0 },
                         TranslateTo = DbCast<string?>(reader["TranslateTo"]),
-                        CategoryID = DbCast<string?>(reader["CategoryID"]),
-                        TaxonomicOrderID = DbCast<string?>(reader["TaxonomicOrderID"]),
+                        CategoryID = DbCast<string>(reader["CategoryID"]) ?? "Unknown",
+                        TaxonomicOrderID = DbCast<string>(reader["TaxonomicOrderID"]) ?? "Unknown",
                     });
                 }
             }
@@ -151,9 +152,10 @@ namespace csci340_iseegreen.Data
                 {
                     genera.Add(new Genera
                     {
-                        KewID = DbCast<string>(reader["KewID"]),
-                        GenusID = DbCast<string>(reader["GenusID"]),
-                        FamilyID = DbCast<string?>(reader["FamilyID"]),
+                        KewID = DbCast<string>(reader["KewID"]) ?? "Unknown",
+                        GenusID = DbCast<string>(reader["GenusID"]) ?? "Unknown",
+                        FamilyID = DbCast<string>(reader["FamilyID"]) ?? "Unknown",
+                        Family = context.Families.Find(DbCast<string>(reader["FamilyID"])) ?? new Families { Family = "Unknown", CategoryID = "Unknown", TaxonomicOrderID = "Unknown", Category = new Categories { Category = "Unknown", Description = "Unknown", Sort = 0, APG4sort = 0 } },
                     });
                 }
             }
@@ -180,9 +182,9 @@ namespace csci340_iseegreen.Data
                 {
                     taxa.Add(new Taxa
                     {
-                        KewID = DbCast<string>(reader["KewID"]),
-                        GenusID = DbCast<string?>(reader["GenusID"]),
-                        SpecificEpithet = DbCast<string?>(reader["SpecificEpithet"]),
+                        KewID = DbCast<string>(reader["KewID"]) ?? "Unknown",
+                        GenusID = DbCast<string>(reader["GenusID"]) ?? "Unknown",
+                        SpecificEpithet = DbCast<string>(reader["SpecificEpithet"]) ?? "Unknown",
                         InfraspecificEpithet = DbCast<string?>(reader["InfraspecificEpithet"]),
                         TaxonRank = DbCast<string?>(reader["TaxonRank"]),
                         HybridGenus = DbCast<string?>(reader["HybridGenus"]),
@@ -190,6 +192,7 @@ namespace csci340_iseegreen.Data
                         Authors = DbCast<string?>(reader["Authors"]),
                         USDAsymbol = DbCast<string?>(reader["USDAsymbol"]),
                         USDAsynonym = DbCast<string?>(reader["USDAsynonym"]),
+                        Genus = context.Genera.Find(DbCast<string>(reader["GenusID"])) ?? new Genera { KewID = "Unknown", GenusID = "Unknown", FamilyID = "Unknown", Family = new Families { Family = "Unknown", CategoryID = "Unknown", TaxonomicOrderID = "Unknown", Category = new Categories { Category = "Unknown", Description = "Unknown", Sort = 0, APG4sort = 0 } } },
                     });
                 }
             }
@@ -216,10 +219,10 @@ namespace csci340_iseegreen.Data
                 {
                     synonyms.Add(new Synonyms
                     {
-                        KewID = DbCast<string>(reader["KewID"]),
-                        TaxaID = DbCast<string?>(reader["TaxaID"]),
-                        Genus = DbCast<string?>(reader["Genus"]),
-                        Species = DbCast<string?>(reader["Species"]),
+                        KewID = DbCast<string>(reader["KewID"]) ?? "Unknown",
+                        TaxaID = DbCast<string>(reader["TaxaID"]) ?? "Unknown",
+                        Genus = DbCast<string>(reader["Genus"]) ?? "Unknown",
+                        Species = DbCast<string>(reader["Species"]) ?? "Unknown",
                         InfraspecificEpithet = DbCast<string?>(reader["InfraspecificEpithet"]),
                         TaxonRank = DbCast<string?>(reader["TaxonRank"]),
                         Authors = DbCast<string?>(reader["Authors"]),

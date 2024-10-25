@@ -36,7 +36,7 @@ namespace csci340_iseegreen.Pages_Search
 
         public int id {get; set;}
 
-        public string scientifcName {get; set;}
+        public required string scientifcName {get; set;} = "";
 
         public async Task<IActionResult> OnGetAsync(string KewID)
         {
@@ -146,17 +146,24 @@ namespace csci340_iseegreen.Pages_Search
                 Identifier = KewID;
                 //Console.WriteLine("Identifier: " + Identifier);
                 return Page();
+            } 
+
+            ListItems? item = null;
+
+            if (item == null)
+            {
+                item = await _context.ListItems.SingleOrDefaultAsync(l => l.KewID == KewID && l.ListID == list.Value);
             }
 
-            ListItems item;
-
-            item = await _context.ListItems.SingleOrDefaultAsync(l => l.KewID == KewID && l.ListID == list.Value);
-
-            if (item != null) {
+            if (item != null)
+            {
                 Error = "This plant is already in that list.";
-                IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Include(g => g.Genus).Include(f => f.Genus!.Family).Include(c => c.Genus!.Family!.Category) select t;
 
-                taxaIQ = taxaIQ.Where(s => s.KewID.Equals(KewID));
+                IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = _context.Taxa
+                    .Include(g => g.Genus)
+                    .Include(f => f.Genus!.Family)
+                    .Include(c => c.Genus!.Family!.Category)
+                    .Where(s => s.KewID.Equals(KewID));
 
                 var taxon = await taxaIQ.ToListAsync();
 
@@ -171,21 +178,21 @@ namespace csci340_iseegreen.Pages_Search
 
                 if (_context.Lists != null)
                 {
-                    SelectList = await _context.Lists
-                    .ToListAsync();
+                    SelectList = await _context.Lists.ToListAsync();
                 }
+
                 Identifier = KewID;
                 return Page();
             }
 
-            item = new ListItems {
+            item = new ListItems
+            {
                 KewID = KewID,
                 ListID = list.Value,
-                TimeDiscovered = DateTime.Now
+                TimeDiscovered = DateTime.Now,
+                Plant = await _context.Taxa.SingleOrDefaultAsync(t => t.KewID == KewID) ?? throw new InvalidOperationException("Plant not found."),
+                List = await _context.Lists.SingleOrDefaultAsync(l => l.Id == list.Value) ?? throw new InvalidOperationException("List not found.")
             };
-            //Console.WriteLine("specific name: " );
-            //var id = await GetIDfromName(scientifcName);
-            //Console.WriteLine("ID in OnGet is: " + id);
 
             await _context.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -278,7 +285,7 @@ namespace csci340_iseegreen.Pages_Search
                         var firstEntry = data[0];
                         var id = firstEntry["id"]?.ToString();
                         Console.WriteLine("First entry ID: " + id);
-                        return id;
+                        return id ?? "Error";
                     }
                     else
                     {

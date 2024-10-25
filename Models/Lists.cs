@@ -13,6 +13,6 @@ namespace csci340_iseegreen.Models
         [StringLength(450)]
         public required string OwnerID { get; set; }
         [ForeignKey("OwnerID")]
-        public IdentityUser? Owner { get; set; }
+        public required IdentityUser Owner { get; set; }
     }
 }
