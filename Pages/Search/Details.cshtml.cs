@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using NuGet.Configuration;
 
 
 namespace csci340_iseegreen.Pages_Search
@@ -70,30 +71,24 @@ namespace csci340_iseegreen.Pages_Search
                 scientifcName = genus + " " + species.ToLower();
                 Console.WriteLine("Scientific Name: " + scientifcName);
             }
-            //string genus = Taxon[0].GenusID;
-            //string species = Taxon[0].SpecificEpithet;
-
-            //scientifcName = genus + " " + species.ToLower();
-
-
-            // see if I can get a string here... time to investigate the properties of Taxon. 
-            //Console.WriteLine("Genus: " + genus);
-            //Console.WriteLine("Species: " + species);
-            //Console.WriteLine("Scientific Name: " + scientifcName);
-            string id = await GetIDfromName(scientifcName);
+            
+            var client = new HttpClient();
+            string id = await GetIDfromName(scientifcName, client);
             Console.WriteLine("ID in OnGet is: " + id);
 
             // Function that gets the Description from the ID
-            await GetDescription(id);
+            //string description = await GetDescription(id, client);
+            //Console.WriteLine("Description in OnGet is: " + description);
+            //Taxon[0].Description = description;
 
 
 
             return Page();
         }
 
-        private async Task GetDescription(string id)
+        private async Task<string> GetDescription(string id, HttpClient client)
         {
-            using (var client = new HttpClient())
+            using (client)
             {
                 try
                 {
@@ -107,20 +102,103 @@ namespace csci340_iseegreen.Pages_Search
                     ViewData["description"] = description;
                     Console.WriteLine("Description: " + description);
                     Console.WriteLine("Successfully got description");
+                    return description ?? "Description not available";
                 }
                 catch (HttpRequestException e)
                 {
                     Console.WriteLine($"Request error: {e.Message}");
+                    return "Error";
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"An error occurred: {ex.Message}");
+                    return "Error";
+                }
+            }
+        }
+
+        public async Task<string> GetIDfromName(string name, HttpClient client)
+        {
+            using (client)
+            {
+                try
+                {
+                    string url = $"https://perenual.com/api/species-list?key=sk-il1O6717dcf920ca97383&q={name}";
+                    var response = await client.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("Successfully got data from name");
+                    var jsonObject = JObject.Parse(responseData);
+                    var data = jsonObject["data"] as JArray;
+                    if (data != null && data.Count > 0)
+                    {
+                        var firstEntry = data[0];
+                        var id = firstEntry["id"]?.ToString();
+                        Console.WriteLine("First entry ID: " + id);
+                        if (id != null)
+                        {
+                            string desc_url = $"https://perenual.com/api/species/details/{id}?key=sk-il1O6717dcf920ca97383";
+                            var desc_response = await client.GetAsync(url);
+                            desc_response.EnsureSuccessStatusCode();
+                            var desc_responseData = await desc_response.Content.ReadAsStringAsync();
+                            Console.WriteLine("Successfully got the data, may have description");
+                            var desc_jsonObject = JObject.Parse(desc_responseData);
+                            var description = desc_jsonObject["description"]?.ToString();
+
+                            // Check if 'default_image' exists and extract the 'original_url'
+                            if (desc_jsonObject["default_image"] is JObject imageObject)
+                            {
+                                string image_url = imageObject["original_url"]?.ToString() ?? "unknown"; // You can change this to "regular_url", "medium_url", etc.
+                                if (image_url != null)
+                                {
+                                    Console.WriteLine("Image URL: " + image_url);
+                                    ViewData["image"] = image_url;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("No image URL found.");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("No image object found.");
+                            }
+
+
+                            //Console.WriteLine("Image URL: " + image_url);
+                            ViewData["description"] = description;
+                            Console.WriteLine("Description: " + description);
+                            Console.WriteLine("Successfully got description");
+
+
+                            return id;
+                        }
+                        else
+                        {
+                            Console.WriteLine("No ID found for the given query.");
+                            return "Error";
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No data found for the given query.");
+                        return "Error";
+                    }
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine($"Request error: {e.Message}");
+                    return "Error";
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    return "Error";
                 }
             }
         }
 
         public async Task<IActionResult> OnPostAddList(string KewID, int? list) {
-            //await MakeApiCall();
             if (list == null) {
                 Error = "You have to select a list.";
                 IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Include(g => g.Genus).Include(f => f.Genus!.Family).Include(c => c.Genus!.Family!.Category) select t;
@@ -199,136 +277,5 @@ namespace csci340_iseegreen.Pages_Search
 
             return RedirectToPage("/ListItems/Index", new { itemid = list.ToString() });
         }
-
-
-        public async Task MakeApiCall()
-        {
-            using (var client = new HttpClient())
-            {
-                try
-                {
-                    string url = $"https://perenual.com/api/species-list?key=sk-il1O6717dcf920ca97383&q=Monstera deliciosa";
-
-                    // Make the GET request
-                    var response = await client.GetAsync(url);
-                    response.EnsureSuccessStatusCode();
-                    var responseData = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine("Successfully got data");
-
-                    // Parse the JSON response
-                    var jsonObject = JObject.Parse(responseData);
-
-                    // Extract the "data" array
-                    var data = jsonObject["data"] as JArray;
-
-                    if (data != null && data.Count > 0)
-                    {
-                        // Get the first entry in the "data" array
-                        var firstEntry = data[0];
-
-                        // Extract the "id" field from the first entry
-                        var id = firstEntry["id"]?.ToString();
-                        
-                        // Print the extracted ID
-                        Console.WriteLine("First entry ID: " + id);
-                        if (id != null)
-                        {
-                            url = $"https://perenual.com/api/species/details/5257?key=sk-il1O6717dcf920ca97383";
-                            //url = $"https://perenual.com/api/species/details/{id}?key=sk-il1O6717dcf920ca97383";
-                            response = await client.GetAsync(url);
-                            response.EnsureSuccessStatusCode();
-                            responseData = await response.Content.ReadAsStringAsync();
-                            Console.WriteLine("Successfully got specific data");
-                            
-                            //string description = GetDescription(responseData);
-                            //ViewData["description"] = description;
-                            //Console.WriteLine("Description: " + description);
-                            Console.WriteLine("Successfully got description");
-
-                        }
-                        else
-                        {
-                            Console.WriteLine("No ID found for the given query.");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("No data found for the given query.");
-                    }
-                }
-                catch (HttpRequestException e)
-                {
-                    Console.WriteLine($"Request error: {e.Message}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
-                }
-            }
-        }
-
-        public async Task<string> GetIDfromName(string name)
-        {
-            using (var client = new HttpClient())
-            {
-                try
-                {
-                    string url = $"https://perenual.com/api/species-list?key=sk-il1O6717dcf920ca97383&q={name}";
-                    var response = await client.GetAsync(url);
-                    response.EnsureSuccessStatusCode();
-                    var responseData = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine("Successfully got data from name");
-                    var jsonObject = JObject.Parse(responseData);
-                    var data = jsonObject["data"] as JArray;
-                    if (data != null && data.Count > 0)
-                    {
-                        var firstEntry = data[0];
-                        var id = firstEntry["id"]?.ToString();
-                        Console.WriteLine("First entry ID: " + id);
-                        return id ?? "Error";
-                    }
-                    else
-                    {
-                        Console.WriteLine("No data found for the given query.");
-                        return "Error";
-                    }
-                }
-                catch (HttpRequestException e)
-                {
-                    Console.WriteLine($"Request error: {e.Message}");
-                    return "Error";
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
-                    return "Error";
-                }
-            }
-        }
-
-
-
-        // private string GetDescription(string responseData)
-        // {
-        //     // Parse the JSON response data
-        //     var jsonObject = JObject.Parse(responseData);
-
-        //     // Extract the "description" field
-        //     var description = jsonObject["description"]?.ToString();
-
-        //     return description ?? "Description not available";
-        // }
-
-        // private int getIDfromName(string name, response)
-        // {
-        //     string url = $"https://perenual.com/api/species-list?key=sk-il1O6717dcf920ca97383&q=Monstera deliciosa";
-        //     var response = client.GetAsync(url);
-        //     response.EnsureSuccessStatusCode();
-        //     var responseData = await response.Content.ReadAsStringAsync();
-        //     var jsonObject = JObject.Parse(responseData);
-        //     int id = 1;
-        //     id = (int)jsonObject[0]["id"];
-        //     return id;
-        // }
     }
 }

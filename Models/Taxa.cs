@@ -35,6 +35,9 @@ namespace csci340_iseegreen.Models
         [ForeignKey("GenusID")]
         public required Genera Genus { get; set; } 
 
+        public string? Description { get; set; }
+        
+
         [DisplayName("Plant")]
         public string Name {
             get {
