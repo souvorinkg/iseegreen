@@ -95,6 +95,7 @@
 }
     </tbody>
 </table>
+<img class="display: flex;" src="https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg" alt="Image not found" />
 
 @if (SignInManager.IsSignedIn(User))
 {
@@ -113,6 +114,7 @@
     </select>
     <input type="hidden" value="@Model.Identifier" name="KewID" />
     <input type="submit" value="Add" />
+    <img class="display: flex;" src="https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg" alt="Image not found" />
 </form>
 }
 
@@ -120,7 +122,8 @@
     <p>
         @ViewData["description"]
     </p>
-    <img src="@ViewData["image"]" alt="Image not found" />
+    @{string url = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";   }
+    <img class="display: flex;" src="@url" />
 </div>
 
 <div>
