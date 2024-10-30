@@ -13,7 +13,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/net7.0/csci340-iseegreen.dll",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/csci340-iseegreen.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
