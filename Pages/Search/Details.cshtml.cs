@@ -77,6 +77,7 @@ namespace csci340_iseegreen.Pages_Search
 
             await GetDescription(id);
             await GetImage(id);
+
             Console.WriteLine("ID in OnGet is: " + id);
 
             // Function that gets the Description from the ID
@@ -87,6 +88,59 @@ namespace csci340_iseegreen.Pages_Search
 
 
             return Page();
+        }
+
+        private async Task<string> GetImage(string id)
+        {
+            var client = new HttpClient();
+            using (client)
+            {
+                try
+                {
+                    string url = $"https://perenual.com/api/species/details/{id}?key=sk-il1O6717dcf920ca97383";
+                    var response = await client.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("Successfully got the data, may have description");
+                    var jsonObject = JObject.Parse(responseData);
+                    // Check if 'default_image' exists and extract the 'original_url'
+                    if (jsonObject["default_image"] is JObject imageObject)
+                    {
+                        string image_url = imageObject["original_url"]?.ToString() ?? "unknown"; // You can change this to "regular_url", "medium_url", etc.
+                        if (image_url != null)
+                        {
+                            Console.WriteLine("Image URL: " + image_url);
+                            ViewData["image"] = image_url;
+                        }
+                        else
+                        {
+                            ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
+                            Console.WriteLine("No image URL found.");
+                        }
+                    }
+                    else
+                    {
+                        ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
+
+                        Console.WriteLine("No image object found.");
+                    }
+                    return "Image not available";
+                }
+                catch (HttpRequestException e)
+                {
+                    ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
+
+                    Console.WriteLine($"Request error: {e.Message}");
+                    return "Error";
+                }
+                catch (Exception ex)
+                {
+                    ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
+
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    return "Error";
+                }
+            }
         }
 
         private async Task<string> GetDescription(string id)
