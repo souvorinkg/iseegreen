@@ -33,10 +33,7 @@ namespace csci340_iseegreen.Models
         [StringLength(255)]
         public string? USDAsynonym { get; set; }
         [ForeignKey("GenusID")]
-        public required Genera Genus { get; set; } 
-
-        public string? Description { get; set; }
-        
+        public required Genera Genus { get; set; }         
 
         [DisplayName("Plant")]
         public string Name {
