@@ -11,11 +11,11 @@ namespace csci340_iseegreen.Models
         [StringLength(255)]
         public string? TranslateTo { get; set; }
         [StringLength(255)]
-        public string? CategoryID { get; set; }
+        public required string CategoryID { get; set; }
         [StringLength(255)]
-        public string? TaxonomicOrderID { get; set; }
+        public required string TaxonomicOrderID { get; set; }
         [ForeignKey("CategoryID")]
-        public Categories? Category { get; set; }
+        public required Categories Category { get; set; }
         public TaxonomicOrders? TaxonomicOrder { get; set; }
     }
 }
