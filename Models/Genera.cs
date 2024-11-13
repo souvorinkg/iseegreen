@@ -11,8 +11,8 @@ namespace csci340_iseegreen.Models
         [StringLength(255)]
         public required string GenusID { get; set; }
         [StringLength(255)]
-        public required string FamilyID { get; set; }
+        public string? FamilyID { get; set; }
         [ForeignKey("FamilyID")]
-        public required Families Family { get; set; }
+        public Families? Family { get; set; }
     }
 }

@@ -8,8 +8,8 @@ namespace csci340_iseegreen.Models
         [StringLength(255)]
         public required string Category { get; set; }
         [StringLength(255)]
-        public required string Description { get; set; }
-        public required int Sort { get; set; }
-        public required long APG4sort { get; set; }
+        public string? Description { get; set; }
+        public int Sort { get; set; }
+        public long APG4sort { get; set; }
     }
 }

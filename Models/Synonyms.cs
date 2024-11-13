@@ -8,11 +8,11 @@ namespace csci340_iseegreen.Models
         [StringLength(255)]
         public required string KewID { get; set; }
         [StringLength(255)]
-        public required string TaxaID { get; set; }
+        public string? TaxaID { get; set; }
         [StringLength(255)]
-        public required string Genus { get; set; }
+        public string? Genus { get; set; }
         [StringLength(255)]
-        public required string Species { get; set; }
+        public string? Species { get; set; }
         [StringLength(255)]
         public string? InfraspecificEpithet { get; set; }
         [StringLength(255)]
