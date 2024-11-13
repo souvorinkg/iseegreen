@@ -17,9 +17,9 @@ namespace csci340_iseegreen.Models
         [DisplayName("Date Added")]
         public DateTime TimeDiscovered { get; set; }
         [ForeignKey("KewID")]
-        public required Taxa Plant { get; set; }
+        public Taxa? Plant { get; set; }
         [ForeignKey("ListID")]
-        public required Lists List { get; set; }
+        public Lists? List { get; set; }
         [ForeignKey("LocationID")]
         public Locations? Location { get; set; }
     }

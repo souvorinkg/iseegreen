@@ -11,10 +11,10 @@ namespace csci340_iseegreen.Models
         [StringLength(255)]
         public required string KewID { get; set; }
         [StringLength(255)]
-        public required string GenusID { get; set; }
+        public string? GenusID { get; set; }
         [StringLength(255)]
         [DisplayName("Species")]
-        public required string SpecificEpithet { get; set; }
+        public string? SpecificEpithet { get; set; }
         [StringLength(255)]
         [DisplayName("Infraspecies")]
         public string? InfraspecificEpithet { get; set; }
@@ -33,13 +33,7 @@ namespace csci340_iseegreen.Models
         [StringLength(255)]
         public string? USDAsynonym { get; set; }
         [ForeignKey("GenusID")]
-        public required Genera Genus { get; set; }   
-
-        public int? PereID { get; set; }  
-
-        public string? Description { get; set; } 
-
-        public string? url { get; set; }   
+        public Genera? Genus { get; set; } 
 
         [DisplayName("Plant")]
         public string Name {

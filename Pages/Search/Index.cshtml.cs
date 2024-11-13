@@ -48,8 +48,14 @@ namespace csci340_iseegreen.Pages.Search
         [BindProperty(SupportsGet = true)]
         public string? CategoryFilter { get; set; }
 
-        [BindProperty]
-        public int? SelectedListId { get; set; }
+        public required string SpeciesSort {get; set;}
+        public required string GenusSort {get; set;}
+        public required string CurrentSpecies {get; set;}
+        public required string CurrentGenus {get; set;}
+        public required string CurrentFamily {get; set;}
+        public required string CurrentSort {get; set;}
+        public required string CurrentFilter {get;set;}
+        public required string CurrentCat {get; set;}
 
         [BindProperty]
         public string? SelectedKewId { get; set; }
