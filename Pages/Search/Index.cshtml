@@ -7,13 +7,23 @@
 <br>
 
 <div id="header_box">
-<h1 id="search_heading">Search</h1>
+    <h1 id="search_heading">Search</h1>
 </div>
 
-<form>
-    <p>
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 
-        <select class="custom_select" asp-for="CategoryFilter" asp-items="Model.Categories" asp-route-CategoryFilter="@Model.CurrentCat">
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-info">
+        @Model.StatusMessage
+    </div>
+}
+
+<form method="get">
+    <p>
+        <select class="custom_select" asp-for="CategoryFilter" asp-items="Model.Categories">
             <option id="op" value="">Category</option>
             @foreach ((string cat, string desc) in Model.CategoryOptions)
             {
@@ -22,46 +32,33 @@
         </select>
         
         <input type="text" id="famsearch" placeholder="Family" asp-for="FamilyString" />
-
         <input type="text" id="genussearch" placeholder="Genus" asp-for="GenusString" />
-        
         <input type="text" id="speciesearch" placeholder="Species" asp-for="SearchString" />
         
         <input type="submit" value="Apply Filters"/>
-
         <a href="./Search">Clear</a>
-
     </p>
 </form>
-
 
 <table class="table">
     <thead>
         <tr>
-            <th id="check">
-                 
-            </th>
-             <th id ="cat">
+            <th id="check"></th>
+            <th id="cat">
                 @Html.DisplayNameFor(model => model.Taxa[0].Genus.Family.Category)
             </th>
-            <th id ="family">
+            <th id="family">
                 @Html.DisplayNameFor(model => model.Taxa[0].Genus.Family)
             </th>
             <th id="genus">
-                <a asp-page="./Index" asp-route-sortOrder="@Model.GenusSort" asp-route-CategoryFilter="@Model.CurrentCat" asp-route-SearchString="@Model.CurrentSpecies"
-   asp-route-GenusString="@Model.CurrentGenus"
-   asp-route-FamilyString="@Model.CurrentFamily">
+                <a asp-page="./Index" asp-route-sortOrder="@Model.GenusSort">
                     @Html.DisplayNameFor(model => model.Taxa[0].Genus)
                 </a>
-                
             </th>
             <th id="species">
-                <a asp-page="./Index" asp-route-sortOrder="@Model.SpeciesSort" asp-route-CategoryFilter="@Model.CurrentCat" asp-route-SearchString="@Model.CurrentSpecies"
-   asp-route-GenusString="@Model.CurrentGenus"
-   asp-route-FamilyString="@Model.CurrentFamily">
+                <a asp-page="./Index" asp-route-sortOrder="@Model.SpeciesSort">
                     @Html.DisplayNameFor(model => model.Taxa[0].SpecificEpithet)
                 </a>
-                
             </th>
             <th id="infra">
                 @Html.DisplayNameFor(model => model.Taxa[0].InfraspecificEpithet)
@@ -69,14 +66,18 @@
             <th id="rank">
                 @Html.DisplayNameFor(model => model.Taxa[0].TaxonRank)
             </th>
-
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <th id="addList">Add To List</th>
+            }
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Taxa) {
+    @foreach (var item in Model.Taxa)
+    {
         <tr>
             <td id="check">
-                <a class="popup" id="plus" asp-area="" asp-page="./Details" asp-route-KewID="@item.KewID">&#x2795</a>
+                <a class="popup" id="plus" asp-page="./Details" asp-route-KewID="@item.KewID">&#x2795</a>
             </td>
             <td id="cat">
                 @Html.DisplayFor(modelItem => item.Genus.Family.Category.Description)
@@ -96,10 +97,27 @@
             <td id="rank">
                 @Html.DisplayFor(modelItem => item.TaxonRank)
             </td>
-
-    
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <td id="addList">
+                    <form method="post" asp-page-handler="AddList">
+                        <input type="hidden" asp-for="SelectedKewId" value="@item.KewID" />
+                        <select asp-for="SelectedListId">
+                            <option value="">Select List</option>
+                            @foreach (var list in Model.SelectList)
+                            {
+                                if (list.OwnerID == UserManager.GetUserId(User))
+                                {
+                                    <option value="@list.Id">@list.Name</option>
+                                }
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Add</button>
+                    </form>
+                </td>
+            }
         </tr>
-}
+    }
     </tbody>
 </table>
 
@@ -109,53 +127,20 @@
 }
 
 <a id="prevnex"
-    asp-page="./Index"
-    asp-route-CategoryFilter="@Model.CurrentCat"
-    asp-route-sortOrder="@Model.CurrentSort"
+   asp-page="./Index"
    asp-route-pageIndex="@(Model.Taxa.PageIndex - 1)"
-   asp-route-SearchString="@Model.CurrentSpecies"
-   asp-route-GenusString="@Model.CurrentGenus"
-   asp-route-FamilyString="@Model.CurrentFamily"
+   asp-route-sortOrder="@Model.CurrentSort"
    asp-route-currentFilter="@Model.CurrentFilter"
+   asp-route-CategoryFilter="@Model.CurrentCat"
    class="btn btn-primary @prevDisabled">
     Previous
 </a>
 <a id="prevnex"
-    asp-page="./Index"
-    asp-route-CategoryFilter="@Model.CurrentCat"
-    asp-route-sortOrder="@Model.CurrentSort"
+   asp-page="./Index"
    asp-route-pageIndex="@(Model.Taxa.PageIndex + 1)"
+   asp-route-sortOrder="@Model.CurrentSort"
    asp-route-currentFilter="@Model.CurrentFilter"
-    asp-route-GenusString="@Model.CurrentGenus"
-    asp-route-SearchString="@Model.CurrentSpecies"
-    asp-route-FamilyString="@Model.CurrentFamily"
+   asp-route-CategoryFilter="@Model.CurrentCat"
    class="btn btn-primary @nextDisabled">
     Next
 </a>
-
-
-
-<style>
-    #plant1 {
-        accent-color: rgb(188, 188, 188);
-        height: 15px;
-        width: 15px;
-        vertical-align: middle;
-    }
-
-    #check {
-        width: 20px;
-    }
-
-    #plus {
-        vertical-align: auto;
-        margin: auto;
-        text-decoration: none;
-    }
-
-    .dropdown {
-        display: none;
-    }
-
-   
-</style>

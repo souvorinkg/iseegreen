@@ -95,7 +95,6 @@
 }
     </tbody>
 </table>
-@* <img class="display: flex;" src="https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg" alt="Image not found" /> *@
 
 @if (SignInManager.IsSignedIn(User))
 {
@@ -109,22 +108,13 @@
                     @Html.DisplayFor(modelItem => item.Name)
                 </option>
             }
-    
     }
     </select>
     <input type="hidden" value="@Model.Identifier" name="KewID" />
     <input type="submit" value="Add" />
-    @* <img class="display: flex;" src="https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg" alt="Image not found" /> *@
 </form>
 }
 
-<div>
-    <p>
-        @ViewData["description"]
-    </p>
-    @{string url = ViewData["image"].ToString();}
-    <img style="display: flex; max-width: 30%;" src="@url" />
-</div>
 
 <div>
     <a asp-page="./Index">Back to Search</a>
