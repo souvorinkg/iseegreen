@@ -193,6 +193,9 @@ namespace csci340_iseegreen.Data
                         USDAsymbol = DbCast<string?>(reader["USDAsymbol"]),
                         USDAsynonym = DbCast<string?>(reader["USDAsynonym"]),
                         Genus = context.Genera.Find(DbCast<string>(reader["GenusID"])) ?? new Genera { KewID = "Unknown", GenusID = "Unknown", FamilyID = "Unknown", Family = new Families { Family = "Unknown", CategoryID = "Unknown", TaxonomicOrderID = "Unknown", Category = new Categories { Category = "Unknown", Description = "Unknown", Sort = 0, APG4sort = 0 } } },
+                        PereID = DbCast<int?>(reader["PereID"]) ?? 0,
+                        Description = DbCast<string?>(reader["Description"]) ?? "Unknown",
+                        url = DbCast<string?>(reader["url"]) ?? "Unknown",
                     });
                 }
             }
