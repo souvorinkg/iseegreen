@@ -14,8 +14,6 @@ using Newtonsoft.Json.Linq;
 using System.ComponentModel;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NuGet.Configuration;
-using Microsoft.CodeAnalysis.Differencing;
-using System.Drawing;
 
 
 namespace csci340_iseegreen.Pages_Search
@@ -43,6 +41,8 @@ namespace csci340_iseegreen.Pages_Search
 
         public async Task<IActionResult> OnGetAsync(string KewID)
         {
+            //await MakeApiCall();
+
             IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Include(g => g.Genus).Include(f => f.Genus!.Family).Include(c => c.Genus!.Family!.Category) select t;
 
             taxaIQ = taxaIQ.Where(s => s.KewID.Equals(KewID));
@@ -62,109 +62,32 @@ namespace csci340_iseegreen.Pages_Search
                 .ToListAsync();
             }
             Identifier = KewID;
-            Taxa tree = Taxon[0];
-            string scientifcName = tree.GenusID + " " + tree.SpecificEpithet.ToLower(); 
-            
-            string idString = "";
-            if (tree.PereID != null) {
-                if (tree.PereID == 0) {
-                    ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
-                    ViewData["description"] = "Description not available";
-                    return Page();
-                }
-                int id = tree.PereID ?? 0;
-                idString = id.ToString();
-            } 
-            else {
-                var client = new HttpClient();
-                idString = await GetIDfromName(scientifcName, client);
-            }
-
-            if (idString == "Error")
+            for (int i = 0; i < Taxon.Count; i++)
             {
-                ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
-                ViewData["description"] = "Description not available";
-                tree.PereID = 0;
-                await _context.SaveChangesAsync();
-                return Page();
+                string genus = Taxon[i].GenusID;
+                string species = Taxon[i].SpecificEpithet;
+                Console.WriteLine("Genus: " + Taxon[i].GenusID);
+                Console.WriteLine("Species: " + Taxon[i].SpecificEpithet);
+                scientifcName = genus + " " + species.ToLower();
+                Console.WriteLine("Scientific Name: " + scientifcName);
             }
-            else {
-                tree.PereID = int.Parse(idString);
-                await _context.SaveChangesAsync();
-            }
+            
+            var client = new HttpClient();
+            string id = await GetIDfromName(scientifcName, client);
+            Console.WriteLine("ID in OnGet is: " + id);
 
-            if (tree.Description != null) {
-                ViewData["description"] = tree.Description;
-            } else {
-                await GetDescription(idString, tree);
-            } 
+            // Function that gets the Description from the ID
+            //string description = await GetDescription(id, client);
+            //Console.WriteLine("Description in OnGet is: " + description);
+            //Taxon[0].Description = description;
 
-            if (tree.url != null) {
-                ViewData["image"] = tree.url;
-            } else {
-                await GetImage(idString, tree);
-            }
-            await _context.SaveChangesAsync();
+
 
             return Page();
         }
 
-        private async Task<string> GetImage(string id, Taxa tree)
+        private async Task<string> GetDescription(string id, HttpClient client)
         {
-            var client = new HttpClient();
-            using (client)
-            {
-                try
-                {
-                    string url = $"https://perenual.com/api/species/details/{id}?key=sk-il1O6717dcf920ca97383";
-                    var response = await client.GetAsync(url);
-                    response.EnsureSuccessStatusCode();
-                    var responseData = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine("Successfully got the data, may have description");
-                    var jsonObject = JObject.Parse(responseData);
-                    if (jsonObject["default_image"] is JObject imageObject)
-                    {
-                        string image_url = imageObject["original_url"]?.ToString() ?? "unknown"; // You can change this to "regular_url", "medium_url", etc.
-                        if (image_url != null)
-                        {
-                            Console.WriteLine("Image URL: " + image_url);
-                            ViewData["image"] = image_url;
-                            tree.url = image_url;
-                        }
-                        else
-                        {
-                            ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
-                            Console.WriteLine("No image URL found.");
-                        }
-                    }
-                    else
-                    {
-                        ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
-
-                        Console.WriteLine("No image object found.");
-                    }
-                    return "Image not available";
-                }
-                catch (HttpRequestException e)
-                {
-                    ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
-
-                    Console.WriteLine($"Request error: {e.Message}");
-                    return "Error";
-                }
-                catch (Exception ex)
-                {
-                    ViewData["image"] = "https://perenual.com/storage/species_image/6489_quercus_alba/og/51276992180_5212077a9b_b.jpg";
-
-                    Console.WriteLine($"An error occurred: {ex.Message}");
-                    return "Error";
-                }
-            }
-        }
-
-        private async Task<string> GetDescription(string id, Taxa tree)
-        {
-            var client = new HttpClient();
             using (client)
             {
                 try
@@ -177,16 +100,6 @@ namespace csci340_iseegreen.Pages_Search
                     var jsonObject = JObject.Parse(responseData);
                     var description = jsonObject["description"]?.ToString();
                     ViewData["description"] = description;
-                    if (description != null)
-                    {
-                        Console.WriteLine("Description: " + description);
-                        tree.Description = description;
-                    }
-                    else
-                    {
-                        ViewData["description"] = "Description not available";
-                        Console.WriteLine("No description found.");
-                    }
                     Console.WriteLine("Description: " + description);
                     Console.WriteLine("Successfully got description");
                     return description ?? "Description not available";
@@ -222,7 +135,49 @@ namespace csci340_iseegreen.Pages_Search
                         var firstEntry = data[0];
                         var id = firstEntry["id"]?.ToString();
                         Console.WriteLine("First entry ID: " + id);
-                        if (id != null) return id; else return "Error";
+                        if (id != null)
+                        {
+                            string desc_url = $"https://perenual.com/api/species/details/{id}?key=sk-il1O6717dcf920ca97383";
+                            var desc_response = await client.GetAsync(url);
+                            desc_response.EnsureSuccessStatusCode();
+                            var desc_responseData = await desc_response.Content.ReadAsStringAsync();
+                            Console.WriteLine("Successfully got the data, may have description");
+                            var desc_jsonObject = JObject.Parse(desc_responseData);
+                            var description = desc_jsonObject["description"]?.ToString();
+
+                            // Check if 'default_image' exists and extract the 'original_url'
+                            if (desc_jsonObject["default_image"] is JObject imageObject)
+                            {
+                                string image_url = imageObject["original_url"]?.ToString() ?? "unknown"; // You can change this to "regular_url", "medium_url", etc.
+                                if (image_url != null)
+                                {
+                                    Console.WriteLine("Image URL: " + image_url);
+                                    ViewData["image"] = image_url;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("No image URL found.");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("No image object found.");
+                            }
+
+
+                            //Console.WriteLine("Image URL: " + image_url);
+                            ViewData["description"] = description;
+                            Console.WriteLine("Description: " + description);
+                            Console.WriteLine("Successfully got description");
+
+
+                            return id;
+                        }
+                        else
+                        {
+                            Console.WriteLine("No ID found for the given query.");
+                            return "Error";
+                        }
                     }
                     else
                     {
@@ -267,6 +222,7 @@ namespace csci340_iseegreen.Pages_Search
                     .ToListAsync();
                 }
                 Identifier = KewID;
+                //Console.WriteLine("Identifier: " + Identifier);
                 return Page();
             } 
 
