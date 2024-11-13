@@ -20,7 +20,7 @@ namespace csci340_iseegreen.Pages_ListItems
         }
 
         [BindProperty]
-        public required ListItems ListItems { get; set; }
+      public ListItems ListItems { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
