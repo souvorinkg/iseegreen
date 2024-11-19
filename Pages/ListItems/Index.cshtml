@@ -54,19 +54,6 @@ List<string> data = new List<string>();
     </tbody>
 </table>
 
-@functions {
-    private void addToListNames(string name, List<string> data)
-    {
-        data.Add(name);
-    }
-}
-
-foreach (var item in Model.ListItems)
-{
-    <p>@item.Plant.Name</p>
-    addToListNames(item.Plant.Name, data);
-}
-
 
 <script>
     // Declare the list as a JavaScript variable
@@ -78,38 +65,46 @@ foreach (var item in Model.ListItems)
     ];
 </script>
 
-<button onclick="exportAsCSV(ourPlantData)">Click me</button>
+<button onclick="exportAsCSV(ourPlantData)">Export as CSV</button>
 
 
 <script>
     function exportAsCSV() {
+        // Prompt the user for the file name
+        const fileName = prompt("Enter the name of the CSV file you'd like to export (without extension):");
+        
+        if (!fileName) {
+            alert("File name is required to export.");
+            return;
+        }
 
-        const titleKeys = Object.keys(ourPlantData[0])
+        const titleKeys = Object.keys(ourPlantData[0]);
 
-        const refinedData = []
-        refinedData.push(titleKeys)
+        const refinedData = [];
+        refinedData.push(titleKeys);
 
         ourPlantData.forEach(item => {
-        refinedData.push(Object.values(item))  
-        })
-        let csvContent = ''
+            refinedData.push(Object.values(item));
+        });
+        
+        let csvContent = '';
 
         refinedData.forEach(row => {
-        csvContent += row.join(',') + '\n'
-        })
+            csvContent += row.join(',') + '\n';
+        });
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' })
-        const objUrl = URL.createObjectURL(blob)
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' });
+        const objUrl = URL.createObjectURL(blob);
 
-        const link = document.createElement('a')
-        link.setAttribute('href', objUrl)
-        link.setAttribute('download', 'File.csv')
-        link.textContent = 'Click to Download'
+        const link = document.createElement('a');
+        link.setAttribute('href', objUrl);
+        link.setAttribute('download', `${fileName}.csv`);
+        link.textContent = 'Click to Download';
 
-        document.querySelector('body').append(link)
-       
+        document.querySelector('body').append(link);
     }
 </script>
+
 
 
 <p>
