@@ -77,6 +77,7 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
             
 
             if (SearchString != null) {
+                SearchString = SearchString.ToUpper();
                 CurrentSpecies = SearchString;
             }
             else {
@@ -84,6 +85,7 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
             }
 
             if (GenusString != null) {
+                GenusString = GenusString.ToUpper();
                 CurrentGenus = GenusString;
     
             }
@@ -92,6 +94,7 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
             }
 
             if (FamilyString != null) {
+                FamilyString = FamilyString.ToUpper();
                 CurrentFamily = FamilyString;
     
             }
@@ -103,15 +106,15 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
 
             if (!string.IsNullOrEmpty(SearchString))
             {
-                taxaIQ = taxaIQ.Where(s => s.SpecificEpithet.Contains(SearchString));
+                taxaIQ = taxaIQ.Where(s => s.SpecificEpithet.ToUpper().Contains(SearchString));
             }
             if (!string.IsNullOrEmpty(FamilyString))
             {
-                taxaIQ = taxaIQ.Where(s => s.Genus.FamilyID.Contains(FamilyString));
+                taxaIQ = taxaIQ.Where(s => s.Genus.FamilyID.ToUpper().Contains(FamilyString));
             }
             if (!string.IsNullOrEmpty(GenusString))
             {
-                taxaIQ = taxaIQ.Where(s => s.GenusID.Contains(GenusString));
+                taxaIQ = taxaIQ.Where(s => s.GenusID.ToUpper().Contains(GenusString));
             }
             if (!string.IsNullOrEmpty(CategoryFilter))
             {
