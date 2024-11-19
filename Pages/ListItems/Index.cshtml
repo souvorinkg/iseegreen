@@ -12,6 +12,16 @@
 <h1 id="search_heading"> @Model.ListItems[0].List.Name</h1>
 </div>
 <br>
+
+List<string>? listNames = ViewData["listNames"] as List<string>;
+if (listNames == null)
+{
+    listNames = new List<string>();
+    
+}
+
+List<string> data = new List<string>();
+
 <table class="table">
     <thead>
         <tr>
@@ -27,6 +37,7 @@
     <tbody>
 @foreach (var item in Model.ListItems) {
         <tr>
+
             <td>
                 @Html.DisplayFor(modelItem => item.TimeDiscovered)
             </td>
@@ -42,6 +53,65 @@
 }
     </tbody>
 </table>
+
+@functions {
+    private void addToListNames(string name, List<string> data)
+    {
+        data.Add(name);
+    }
+}
+
+foreach (var item in Model.ListItems)
+{
+    <p>@item.Plant.Name</p>
+    addToListNames(item.Plant.Name, data);
+}
+
+
+<script>
+    // Declare the list as a JavaScript variable
+    var ourPlantData = [
+    @foreach (var item in Model.ListItems)
+    {
+        <text>{ plant: '@item.Plant.Name' },</text>
+    }
+    ];
+</script>
+
+<button onclick="exportAsCSV(ourPlantData)">Click me</button>
+
+
+<script>
+    function exportAsCSV() {
+
+        const titleKeys = Object.keys(ourPlantData[0])
+
+        const refinedData = []
+        refinedData.push(titleKeys)
+
+        ourPlantData.forEach(item => {
+        refinedData.push(Object.values(item))  
+        })
+        let csvContent = ''
+
+        refinedData.forEach(row => {
+        csvContent += row.join(',') + '\n'
+        })
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' })
+        const objUrl = URL.createObjectURL(blob)
+
+        const link = document.createElement('a')
+        link.setAttribute('href', objUrl)
+        link.setAttribute('download', 'File.csv')
+        link.textContent = 'Click to Download'
+
+        document.querySelector('body').append(link)
+       
+    }
+</script>
+
+
 <p>
     <a asp-page="/Search/Index">Search for more!</a>
 </p>
