@@ -32,21 +32,27 @@
                 <option value="@cat">@desc</option>
             }
         </select>
-        
-        <input type="text" id="famsearch" placeholder="Family" asp-for="FamilyString" />
-        <input type="text" id="genussearch" placeholder="Genus" asp-for="GenusString" />
-        <input type="text" id="speciesearch" placeholder="Species" asp-for="SearchString" />
-        
+
+        <input type="text" id="famsearch" placeholder="Family" asp-for="FamilyString" oninput="hidePlaceholderText(2)" />
+
+        <input type="text" id="genussearch" placeholder="Genus" asp-for="GenusString" oninput="hidePlaceholderText(1)" />
+    
+        <input type="text" id="speciesearch" placeholder="Species" asp-for="SearchString" oninput="hidePlaceholderText(0)" />
         <input type="submit" value="Apply Filters"/>
         <a href="./Search">Clear</a>
+
+        <p id="placeholderText">placeholder autocomplete</p>
+
     </p>
 </form>
 
 <table class="table">
     <thead>
         <tr>
-            <th id="check"></th>
-            <th id="cat">
+            <th id="check">
+
+            </th>
+             <th id ="cat">
                 @Html.DisplayNameFor(model => model.Taxa[0].Genus.Family.Category)
             </th>
             <th id="family">
@@ -56,11 +62,13 @@
                 <a asp-page="./Index" asp-route-sortOrder="@Model.GenusSort">
                     @Html.DisplayNameFor(model => model.Taxa[0].Genus)
                 </a>
+
             </th>
             <th id="species">
                 <a asp-page="./Index" asp-route-sortOrder="@Model.SpeciesSort">
                     @Html.DisplayNameFor(model => model.Taxa[0].SpecificEpithet)
                 </a>
+
             </th>
             <th id="infra">
                 @Html.DisplayNameFor(model => model.Taxa[0].InfraspecificEpithet)
@@ -119,6 +127,8 @@
                     </form>
                 </td>
             }
+
+
         </tr>
     }
     </tbody>
@@ -148,18 +158,91 @@
     Next
 </a>
 
-
-
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var statusMessage = document.getElementById('statusMessage');
-        if (statusMessage) {
-            setTimeout(function() {
-                statusMessage.style.display = 'none';
-                //@Model.StatusMessage = null;
-            }, 5000);
-            
+    function hidePlaceholderText(level) {
+        const placeholderElement = document.getElementById('placeholderText');
+        familiesString = document.getElementById('famsearch').value;
+        generaString = document.getElementById('genussearch').value;
+        speciesString = document.getElementById('speciesearch').value;
+
+        // Case 0:#check familiesString has length of 2 or greater
+        // Case 1:#check generaString has length of 2 or greater
+        // Case 2:#check speciesString has length of 2 or greater
+
+        
+        if (familiesString.length >= 2) {
+            level = 2;
+            searchText = familiesString;
+        } else if (generaString.length >= 2) {
+            level = 1;
+            searchText = generaString;
+        } else if (speciesString.length >= 4) {
+            level = 0;
+            searchText = speciesString;
+        } else {
+            level = -1;
+            searchText = "n";
         }
+
+        // Check if any of the input fields have at least 2 characters
+        if (searchText.length >= 2) {
+
+            //const searchText = "quercus";
+
+            console.log('Search text:', searchText); // Log the search text
+            console.log('Level:', level); // Log the level
+            console.log("family string:", familiesString);
+            console.log("genus string:", generaString);
+            console.log("species string:", speciesString);
+            
+            // Clear the existing content
+            placeholderElement.innerHTML = '';
+
+            fetch(`/Search/Index?handler=LikelyMatches&query=${searchText}&level=${level}`)
+                .then(response => response.json())
+                .then(familyString => {
+                    familyString.forEach(plant => {
+                        console.log(plant); 
+                        placeholderElement.innerHTML += `<div>${plant}</div>`; 
+                    });
+                })
+    .catch(error => {
+        console.error('Error fetching likely matches:', error);
     });
+
+        } else {
+            console.log('Reset placeholder text'); 
+            placeholderElement.innerHTML = 'placeholder autocomplete'; 
+        }
+    }
 </script>
+
+
+
+
+
+
+<style>
+    #plant1 {
+        accent-color: rgb(188, 188, 188);
+        height: 15px;
+        width: 15px;
+        vertical-align: middle;
+    }
+
+    #check {
+        width: 20px;
+    }
+
+    #plus {
+        vertical-align: auto;
+        margin: auto;
+        text-decoration: none;
+    }
+
+    .dropdown {
+        display: none;
+    }
+
+
+</style>
