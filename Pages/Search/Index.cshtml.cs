@@ -146,15 +146,40 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
 
         }
 
-        // public List<String> GetLikelyMatches(string searchString, level)
-        // {
-
-        //     return ["Aloe", "Aloe vera", "Aloe barbadensis"];
-        // }
-
         public JsonResult OnGetLikelyMatches(string query, int level) {
-            var matches = new List<string> { $"{query} + 1", $"{query} + 2", $"{query} + 3" }; // Mocked data
-            return new JsonResult(matches); 
+            if (level == 2){
+                List<string> PotFamilies = [];
+                foreach (var fam in _context.Families) {
+                    if (fam.Family.Contains(query)) {
+                        PotFamilies.Add(fam.Family);
+                    }
+                }
+                List<string> cappedPotFamilies = PotFamilies.Take(10).ToList();
+                return new JsonResult(cappedPotFamilies);
+            } 
+            if (level == 1) {
+                List<string> PotGenera = new List<string>();
+                foreach (var gen in _context.Genera) {
+                    if (gen.GenusID.Contains(query)) {
+                        PotGenera.Add(gen.GenusID);
+                    }
+                }
+                List<string> cappedPotGenera = PotGenera.Take(10).ToList();
+                return new JsonResult(cappedPotGenera);
+            } 
+            if (level == 0) {
+                List<string> PotSpecies = new List<string>();
+                foreach (var sp in _context.Taxa) {
+                    if (sp.SpecificEpithet.Contains(query) && !PotSpecies.Contains(sp.SpecificEpithet)) {
+                        PotSpecies.Add(sp.SpecificEpithet);
+                    }
+                }
+                List<string> cappedPotSpecies = PotSpecies.Take(10).ToList();
+                return new JsonResult(cappedPotSpecies);
+            }
+            List<string> nullResult = new List<string>();
+            nullResult.Add("No results found");
+            return new JsonResult(nullResult);
         }
 
 

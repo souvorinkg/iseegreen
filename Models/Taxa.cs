@@ -14,7 +14,7 @@ namespace csci340_iseegreen.Models
         public string? GenusID { get; set; }
         [StringLength(255)]
         [DisplayName("Species")]
-        public string? SpecificEpithet { get; set; }
+        public required string SpecificEpithet { get; set; }
         [StringLength(255)]
         [DisplayName("Infraspecies")]
         public string? InfraspecificEpithet { get; set; }

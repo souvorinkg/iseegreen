@@ -147,12 +147,16 @@
 
         
         if (familiesString.length >= 2) {
+            level = 2;
             searchText = familiesString;
         } else if (generaString.length >= 2) {
+            level = 1;
             searchText = generaString;
-        } else if (speciesString.length >= 2) {
+        } else if (speciesString.length >= 4) {
+            level = 0;
             searchText = speciesString;
         } else {
+            level = -1;
             searchText = "n";
         }
 
