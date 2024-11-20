@@ -478,3 +478,40 @@ input[type=submit]:hover {
 .book_link {
   color: #557639
 }
+ 
+/* new for the search page pop up */
+.status-message {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 16px;
+  border-radius: 4px;
+  z-index: 1000;
+  animation: slideDown 0.5s ease-out, fadeOut 0.5s ease-in 4.5s;
+  margin-top: 20px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  color: white;
+  background-color: #4CAF50;
+}
+
+@keyframes slideDown {
+  0% {
+      transform: translateX(-50%) translateY(-100%);
+      opacity: 0;
+  }
+  100% {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+      opacity: 1;
+  }
+  100% {
+      opacity: 0;
+  }
+}

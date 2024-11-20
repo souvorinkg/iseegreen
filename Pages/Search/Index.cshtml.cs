@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using csci340_iseegreen.Data;
 using System.Data;
+using System.Runtime.CompilerServices;
 
 namespace csci340_iseegreen.Pages.Search
 {
@@ -31,7 +32,6 @@ namespace csci340_iseegreen.Pages.Search
         public List<string> Families { get; set; } = new List<string>();
         public IList<(string, string)> CategoryOptions { get; set; }
         public List<Models.Lists> SelectList { get; set; } = new List<Models.Lists>();
-        public SelectList? Categories { get; set; }
 
         [TempData]
         public string StatusMessage { get; set; }
@@ -48,17 +48,15 @@ namespace csci340_iseegreen.Pages.Search
         [BindProperty(SupportsGet = true)]
         public string? CategoryFilter { get; set; }
 
-        public required string SpeciesSort {get; set;}
-        public required string GenusSort {get; set;}
-        public required string CurrentSpecies {get; set;}
-        public required string CurrentGenus {get; set;}
-        public required string CurrentFamily {get; set;}
-        public required string CurrentSort {get; set;}
-        public required string CurrentFilter {get;set;}
-        public required string CurrentCat {get; set;}
+        [BindProperty]
+        public int? SelectedListId { get; set; }
 
         [BindProperty]
         public string? SelectedKewId { get; set; }
+        [BindProperty]
+        public int? PageIndex {get; set;}
+
+        public SelectList? Categories { get; set; }
 
         public string SpeciesSort { get; set; }
         public string GenusSort { get; set; }
@@ -68,6 +66,7 @@ namespace csci340_iseegreen.Pages.Search
         public string CurrentSort { get; set; }
         public string CurrentFilter { get; set; }
         public string CurrentCat { get; set; }
+        
 
         private async Task LoadTaxaAsync(string sortOrder, int? pageIndex)
         {
@@ -109,7 +108,6 @@ namespace csci340_iseegreen.Pages.Search
                     taxaIQ = taxaIQ.OrderBy(s => s.SpecificEpithet);
                     break;
             }
-
             var pageSize = Configuration.GetValue("PageSize", 10);
             Taxa = await PaginatedList<Models.Taxa>.CreateAsync(taxaIQ.AsNoTracking(), pageIndex ?? 1, pageSize);
         }
@@ -119,6 +117,7 @@ namespace csci340_iseegreen.Pages.Search
             GenusSort = String.IsNullOrEmpty(sortOrder) ? "genus_desc" : "genus";
             SpeciesSort = String.IsNullOrEmpty(sortOrder) ? "species_desc" : "";
             CurrentSort = sortOrder;
+            
             
             if (CategoryFilter != null)
             {
@@ -134,23 +133,25 @@ namespace csci340_iseegreen.Pages.Search
             SelectList = await _context.Lists.ToListAsync();
             await LoadTaxaAsync(sortOrder, pageIndex);
 
+            //StatusMessage = string.Empty;
+
             return Page();
         }
 
         public async Task<IActionResult> OnPostAddListAsync()
         {
+            Console.WriteLine("Current page" + PageIndex);
             if (!SelectedListId.HasValue)
             {
                 StatusMessage = "Please select a list.";
-                await LoadTaxaAsync(CurrentSort, 1);
-                return Page();
+                
+                return RedirectToPageWithContext(PageIndex);
             }
 
             if (string.IsNullOrEmpty(SelectedKewId))
             {
                 StatusMessage = "Invalid plant selection.";
-                await LoadTaxaAsync(CurrentSort, 1);
-                return Page();
+                return RedirectToPageWithContext(PageIndex);
             }
 
             var existingItem = await _context.ListItems
@@ -159,8 +160,7 @@ namespace csci340_iseegreen.Pages.Search
             if (existingItem != null)
             {
                 StatusMessage = "This plant is already in that list.";
-                await LoadTaxaAsync(CurrentSort, 1);
-                return Page();
+                return RedirectToPageWithContext(PageIndex);
             }
 
             var plant = await _context.Taxa.FirstOrDefaultAsync(t => t.KewID == SelectedKewId);
@@ -169,8 +169,7 @@ namespace csci340_iseegreen.Pages.Search
             if (plant == null || list == null)
             {
                 StatusMessage = "Plant or list not found.";
-                await LoadTaxaAsync(CurrentSort, 1);
-                return Page();
+                return RedirectToPageWithContext(PageIndex);
             }
 
             var item = new Models.ListItems
@@ -186,8 +185,24 @@ namespace csci340_iseegreen.Pages.Search
             await _context.SaveChangesAsync();
 
             StatusMessage = "Plant successfully added to list.";
-            await LoadTaxaAsync(CurrentSort, 1);
-            return Page();
+            return RedirectToPageWithContext(PageIndex);
         }
+
+        private IActionResult RedirectToPageWithContext(int? pageIndex)
+        {
+            // Create route values object with all current parameters
+            var routeValues = new 
+            { 
+                sortOrder = CurrentSort,
+                pageIndex = pageIndex ?? Taxa?.PageIndex ?? 1,
+                SearchString = SearchString,
+                FamilyString = FamilyString,
+                GenusString = GenusString,
+                CategoryFilter = CategoryFilter
+            };
+
+            return RedirectToPage("./Index", routeValues);
+        }
+
     }
 }

@@ -16,10 +16,12 @@
 
 @if (!string.IsNullOrEmpty(Model.StatusMessage))
 {
-    <div class="alert alert-info">
+    <div id="statusMessage" class="status-message">
         @Model.StatusMessage
     </div>
 }
+
+<br>
 
 <form method="get">
     <p>
@@ -102,6 +104,7 @@
                 <td id="addList">
                     <form method="post" asp-page-handler="AddList">
                         <input type="hidden" asp-for="SelectedKewId" value="@item.KewID" />
+                        <input type="hidden" asp-for="PageIndex" value="@Model.Taxa.PageIndex"/>
                         <select asp-for="SelectedListId">
                             <option value="">Select List</option>
                             @foreach (var list in Model.SelectList)
@@ -144,3 +147,19 @@
    class="btn btn-primary @nextDisabled">
     Next
 </a>
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var statusMessage = document.getElementById('statusMessage');
+        if (statusMessage) {
+            setTimeout(function() {
+                statusMessage.style.display = 'none';
+                //@Model.StatusMessage = null;
+            }, 5000);
+            
+        }
+    });
+</script>
