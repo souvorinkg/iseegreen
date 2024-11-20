@@ -137,23 +137,45 @@
 <script>
     function hidePlaceholderText(level) {
         const placeholderElement = document.getElementById('placeholderText');
+        familiesString = document.getElementById('famsearch').value;
+        generaString = document.getElementById('genussearch').value;
+        speciesString = document.getElementById('speciesearch').value;
+
+        // Case 0:#check familiesString has length of 2 or greater
+        // Case 1:#check generaString has length of 2 or greater
+        // Case 2:#check speciesString has length of 2 or greater
+
+        
+        if (familiesString.length >= 2) {
+            searchText = familiesString;
+        } else if (generaString.length >= 2) {
+            searchText = generaString;
+        } else if (speciesString.length >= 2) {
+            searchText = speciesString;
+        } else {
+            searchText = "n";
+        }
 
         // Check if any of the input fields have at least 2 characters
-        if ((document.getElementById('famsearch').value.length >= 2) ||
-            (document.getElementById('genussearch').value.length >= 2) ||
-            (document.getElementById('speciesearch').value.length >= 2)) {
+        if (searchText.length >= 2) {
+
+            //const searchText = "quercus";
+
+            console.log('Search text:', searchText); // Log the search text
+            console.log('Level:', level); // Log the level
+            console.log("family string:", familiesString);
+            console.log("genus string:", generaString);
+            console.log("species string:", speciesString);
             
             // Clear the existing content
             placeholderElement.innerHTML = '';
 
-            // Use Fetch API or AJAX to get the family string dynamically based on the level
-            fetch(`/Search/Index?handler=LikelyMatches&query=ablus&level=${level}`)
+            fetch(`/Search/Index?handler=LikelyMatches&query=${searchText}&level=${level}`)
                 .then(response => response.json())
                 .then(familyString => {
-                    // Iterate through the list and append each plant to the HTML
                     familyString.forEach(plant => {
-                        console.log(plant); // Log each plant name
-                        placeholderElement.innerHTML += `<div>${plant}</div>`; // Add each plant in a new <div>
+                        console.log(plant); 
+                        placeholderElement.innerHTML += `<div>${plant}</div>`; 
                     });
                 })
     .catch(error => {
@@ -161,8 +183,8 @@
     });
 
         } else {
-            console.log('Reset placeholder text'); // Log the reset
-            placeholderElement.innerHTML = 'placeholder autocomplete'; // Reset the text
+            console.log('Reset placeholder text'); 
+            placeholderElement.innerHTML = 'placeholder autocomplete'; 
         }
     }
 </script>

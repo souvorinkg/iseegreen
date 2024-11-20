@@ -153,7 +153,7 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
         // }
 
         public JsonResult OnGetLikelyMatches(string query, int level) {
-            var matches = new List<string> { "aloe", "aloe vera", "quercus albus" }; // Mocked data
+            var matches = new List<string> { $"{query} + 1", $"{query} + 2", $"{query} + 3" }; // Mocked data
             return new JsonResult(matches); 
         }
 
