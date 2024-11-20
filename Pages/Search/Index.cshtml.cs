@@ -76,17 +76,45 @@ namespace csci340_iseegreen.Pages.Search
                                             .Include(c => c.Genus.Family.Category)
                                             select t;
 
+            if (SearchString != null) {
+                SearchString = SearchString.ToUpper();
+                CurrentSpecies = SearchString;
+            }
+            else {
+                SearchString = CurrentSpecies;
+            }
+
+            if (GenusString != null) {
+                GenusString = GenusString.ToUpper();
+                CurrentGenus = GenusString;
+    
+            }
+            else {
+                GenusString = CurrentGenus;
+            }
+
+            if (FamilyString != null) {
+                FamilyString = FamilyString.ToUpper();
+                CurrentFamily = FamilyString;
+    
+            }
+            else {
+                FamilyString = CurrentFamily;
+            }
+            
+
+
             if (!string.IsNullOrEmpty(SearchString))
             {
-                taxaIQ = taxaIQ.Where(s => s.SpecificEpithet.Contains(SearchString));
+                taxaIQ = taxaIQ.Where(s => s.SpecificEpithet.ToUpper().Contains(SearchString));
             }
             if (!string.IsNullOrEmpty(FamilyString))
             {
-                taxaIQ = taxaIQ.Where(s => s.Genus.FamilyID.Contains(FamilyString));
+                taxaIQ = taxaIQ.Where(s => s.Genus.FamilyID.ToUpper().Contains(FamilyString));
             }
             if (!string.IsNullOrEmpty(GenusString))
             {
-                taxaIQ = taxaIQ.Where(s => s.GenusID.Contains(GenusString));
+                taxaIQ = taxaIQ.Where(s => s.GenusID.ToUpper().Contains(GenusString));
             }
             if (!string.IsNullOrEmpty(CategoryFilter))
             {

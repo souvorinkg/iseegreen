@@ -21,6 +21,8 @@ namespace csci340_iseegreen.Pages_ListItems
 
         public IList<ListItems> ListItems { get;set; } = default!;
 
+        public List<string> nameList { get; set; } = new List<string>();
+
         public async Task OnGetAsync(int? itemid)
         {
             if (_context.ListItems != null)
@@ -38,8 +40,20 @@ namespace csci340_iseegreen.Pages_ListItems
                 var list = await listQ.ToListAsync();
                 
                 ListItems = list;
+                ViewData["List"] = list;
+                foreach (var item in list)
+                {
+                    Console.WriteLine("ListItems: " + item.Plant.Name);
+                    nameList.Add(item.Plant.Name);
+                }
+                nameList = nameList.Distinct().ToList();
+                ViewData["nameList"] = nameList;
             }
 
+        }
+        public List<string> GetPlantNames()
+        {
+            return nameList;
         }
     }
 }
