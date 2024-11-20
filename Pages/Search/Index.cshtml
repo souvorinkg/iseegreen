@@ -20,16 +20,17 @@
                 <option value="@cat">@desc</option>
             }
         </select>
-        
-        <input type="text" id="famsearch" placeholder="Family" asp-for="FamilyString" />
 
-        <input type="text" id="genussearch" placeholder="Genus" asp-for="GenusString" />
-        
-        <input type="text" id="speciesearch" placeholder="Species" asp-for="SearchString" />
-        
+        <input type="text" id="famsearch" placeholder="Family" asp-for="FamilyString" oninput="hidePlaceholderText(2)" />
+
+        <input type="text" id="genussearch" placeholder="Genus" asp-for="GenusString" oninput="hidePlaceholderText(1)" />
+    
+        <input type="text" id="speciesearch" placeholder="Species" asp-for="SearchString" oninput="hidePlaceholderText(0)" />
         <input type="submit" value="Apply Filters"/>
 
         <a href="./Search">Clear</a>
+
+        <p id="placeholderText">placeholder autocomplete</p>
 
     </p>
 </form>
@@ -39,7 +40,7 @@
     <thead>
         <tr>
             <th id="check">
-                 
+
             </th>
              <th id ="cat">
                 @Html.DisplayNameFor(model => model.Taxa[0].Genus.Family.Category)
@@ -53,7 +54,7 @@
    asp-route-FamilyString="@Model.CurrentFamily">
                     @Html.DisplayNameFor(model => model.Taxa[0].Genus)
                 </a>
-                
+
             </th>
             <th id="species">
                 <a asp-page="./Index" asp-route-sortOrder="@Model.SpeciesSort" asp-route-CategoryFilter="@Model.CurrentCat" asp-route-SearchString="@Model.CurrentSpecies"
@@ -61,7 +62,7 @@
    asp-route-FamilyString="@Model.CurrentFamily">
                     @Html.DisplayNameFor(model => model.Taxa[0].SpecificEpithet)
                 </a>
-                
+
             </th>
             <th id="infra">
                 @Html.DisplayNameFor(model => model.Taxa[0].InfraspecificEpithet)
@@ -97,7 +98,7 @@
                 @Html.DisplayFor(modelItem => item.TaxonRank)
             </td>
 
-    
+
         </tr>
 }
     </tbody>
@@ -133,6 +134,42 @@
     Next
 </a>
 
+<script>
+    function hidePlaceholderText(level) {
+        const placeholderElement = document.getElementById('placeholderText');
+
+        // Check if any of the input fields have at least 2 characters
+        if ((document.getElementById('famsearch').value.length >= 2) ||
+            (document.getElementById('genussearch').value.length >= 2) ||
+            (document.getElementById('speciesearch').value.length >= 2)) {
+            
+            // Clear the existing content
+            placeholderElement.innerHTML = '';
+
+            // Use Fetch API or AJAX to get the family string dynamically based on the level
+            fetch(`/Search/Index?handler=LikelyMatches&query=ablus&level=${level}`)
+                .then(response => response.json())
+                .then(familyString => {
+                    // Iterate through the list and append each plant to the HTML
+                    familyString.forEach(plant => {
+                        console.log(plant); // Log each plant name
+                        placeholderElement.innerHTML += `<div>${plant}</div>`; // Add each plant in a new <div>
+                    });
+                })
+    .catch(error => {
+        console.error('Error fetching likely matches:', error);
+    });
+
+        } else {
+            console.log('Reset placeholder text'); // Log the reset
+            placeholderElement.innerHTML = 'placeholder autocomplete'; // Reset the text
+        }
+    }
+</script>
+
+
+
+
 
 
 <style>
@@ -157,5 +194,5 @@
         display: none;
     }
 
-   
+
 </style>
