@@ -11,6 +11,7 @@ using csci340_iseegreen.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using System.Drawing;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace csci340_iseegreen.Pages.Search
 {
@@ -33,10 +34,17 @@ namespace csci340_iseegreen.Pages.Search
 
 
         public PaginatedList<csci340_iseegreen.Models.Taxa> Taxa { get;set; } = default!;
-        public List<string> Families {get; set;}
+        //public List<string> Families {get; set;}
         // List of (CategoryID, FullCategoryName) entries for all categories
         // e.g., ("F", "Fern")
         public IList<(string, string)> CategoryOptions { get; set; }
+
+
+// Expose FamilyOptions as a SelectList
+
+        public List<string> Families {get; set;}
+
+
 
         [BindProperty(SupportsGet = true)]
         public string? SearchString { get; set; }
@@ -62,8 +70,20 @@ namespace csci340_iseegreen.Pages.Search
 
 
 
+        public SelectList SelectListItems { get; set; }
+
+
+
         public async Task OnGetAsync(string sortOrder, string FamilyString, string GenusString, string SearchString, string? CategoryFilter, int? pageIndex)
         {
+            // for each family in the database, add the family name to the list of families
+            var families = _context.Families.Select(fam => fam.Family).ToList();
+
+
+            IEnumerable<SelectListItem> FamilyOptions = families.Select(fam => new SelectListItem {Text = fam, Value = fam});
+
+            SelectListItems = new(FamilyOptions, "Value", "Text");
+
             GenusSort = (String.IsNullOrEmpty(sortOrder) || sortOrder.Equals("genus_desc"))? "genus": "genus_desc";
             SpeciesSort = String.IsNullOrEmpty(sortOrder)? "species_desc": "";
             
@@ -147,6 +167,8 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
         }
 
         public JsonResult OnGetLikelyMatches(string query, int level) {
+            query = query[0].ToString().ToUpper() + query.Substring(1).ToLower();
+            Console.WriteLine("Query: " + query);
             if (level == 2){
                 List<string> PotFamilies = [];
                 foreach (var fam in _context.Families) {
@@ -154,7 +176,7 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
                         PotFamilies.Add(fam.Family);
                     }
                 }
-                List<string> cappedPotFamilies = PotFamilies.Take(10).ToList();
+                List<string> cappedPotFamilies = PotFamilies.Take(5).ToList();
                 return new JsonResult(cappedPotFamilies);
             } 
             if (level == 1) {
@@ -164,7 +186,7 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
                         PotGenera.Add(gen.GenusID);
                     }
                 }
-                List<string> cappedPotGenera = PotGenera.Take(10).ToList();
+                List<string> cappedPotGenera = PotGenera.Take(5).ToList();
                 return new JsonResult(cappedPotGenera);
             } 
             if (level == 0) {
@@ -183,5 +205,9 @@ IQueryable<csci340_iseegreen.Models.Taxa> taxaIQ = from t in _context.Taxa.Inclu
         }
 
 
+    }
+
+    internal interface IEnumerable<T1, T2>
+    {
     }
 }
